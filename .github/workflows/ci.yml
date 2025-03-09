@@ -36,13 +36,16 @@ jobs:
           php-version: 8.2
           extensions: mbstring, xml, mysql
 
+      - name: Clear Composer Cache
+        run: composer clear-cache
+
       - name: Install Composer dependencies
         run: composer install --no-progress --no-suggest --prefer-dist
 
       - name: Ensure vendor directory exists
         run: test -d vendor || (echo "Vendor directory not found!" && exit 1)
 
-      - name: Check if PHPStan is installed
+      - name: Verify PHPStan is installed
         run: test -f vendor/bin/phpstan || (echo "PHPStan is missing! Installing..." && composer require --dev phpstan/phpstan)
 
       - name: Copy .env file
@@ -82,8 +85,11 @@ jobs:
       - name: Run Laravel Pint
         run: ./vendor/bin/pint
 
+      - name: Debug PHPStan Path
+        run: ls -lah vendor/bin/
+
       - name: Run PHPStan
-        run: ./vendor/bin/phpstan analyse || (echo "PHPStan analysis failed!" && exit 1)
+        run: php vendor/bin/phpstan analyse || (echo "PHPStan analysis failed!" && exit 1)
 
       - name: Run PHPUnit tests
         env:
