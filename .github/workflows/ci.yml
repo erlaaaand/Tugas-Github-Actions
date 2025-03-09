@@ -36,7 +36,10 @@ jobs:
           php-version: 8.2
           extensions: mbstring, xml, mysql
 
-      - name: Clear Composer Cache
+      - name: Validate Composer configuration
+        run: composer validate
+
+      - name: Clear Composer cache
         run: composer clear-cache
 
       - name: Install Composer dependencies
@@ -77,19 +80,19 @@ jobs:
             sleep 2
           done
 
-      - name: Set up database
+      - name: Run migrations and seed database
         run: |
           php artisan migrate --force
           php artisan db:seed --force
 
-      - name: Run Laravel Pint
-        run: ./vendor/bin/pint
+      - name: Run Laravel Pint (Code Linting)
+        run: php vendor/bin/pint
 
       - name: Debug PHPStan Path
         run: ls -lah vendor/bin/
 
-      - name: Run PHPStan
-        run: php vendor/bin/phpstan analyse || (echo "PHPStan analysis failed!" && exit 1)
+      - name: Run PHPStan (Static Analysis)
+        run: php vendor/bin/phpstan analyse app/ routes/ database/ --level=max || (echo "PHPStan analysis failed!" && exit 1)
 
       - name: Run PHPUnit tests
         env:
